@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the 
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src *; script-src * 'unsafe-eval' 'unsafe-inline'; connect-src *; img-src *; style-src * 'unsafe-inline' ; media-src *">  
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *" />
+    
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+
+    <title>DST-CS</title>
+  <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css"/>
+  <link rel="stylesheet" href="css/fonts.css"/>
+  <style type="text/css">
+.flag-element {
+  position: absolute;
+  left: 9px;
+  top: 5px;
+}
+.nh {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+  .lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid #fff;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #fff transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading{
+	display:none;
+	
+}
+.alertdiv{
+	background-color:rgba(0,255,0,0.7);
+	width:300px;
+	height:120px;
+	position:absolute;
+	top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+	display:none;
+    z-index: 1;
+	line-height: 40px;
+}
+.alerthead{
+	background-color:rgba(0,0,204,0.7);
+}
+.alertbtn{
+	position:absolute;
+	left: 100px;
+	top: 70px;
+	width: 115px;
+	height: 46px;
+	background-image:url(img/ok.png);
+	background-repeat:no-repeat;
+	line-height: 40px;
+	color: rgba(0,0,0,1);
+}
+
+.time_select{
+	background-color:rgba(0,255,0,0.4);
+	width:401px;
+	height:61px;
+	position:absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+	line-height: 40px;
+}
+.timerbox1{
+	position:absolute;
+    top: 70%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.wrapper {
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .wrapper:first-child {
+            margin-right: 2em;
+        }
+
+        .wrapper label {
+            margin-bottom: 1em;
+            display: inline-block;
+        }
+
+        .container {
+            padding: 1em;
+            text-align: center;
+            border: 1px solid #fff;
+            border-radius: 6px;
+        }
+.h1 {
+font-size: 2.5em;
+line-height: 1.0em;
+} 
+.h2{
+font-size: 2.0em;
+line-height: 1.0em;
+overflow: hidden;
+padding:6px;
+  height:auto;
+}
+  </style>  
+<!--<link rel="stylesheet" href="css/jquery.mobile.theme-1.4.5.min.css"/> -->
+<script src="js/jquery.js"></script>
+<script src="js/jquery.mobile-1.4.5.js"></script>
+<script src="js/gauge.min.js"></script> 
+<script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+	<script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
+	<script type="text/javascript">
+var x=0;
+var imgurl='img/Globe_Disconnect.png';
+var Ntester='';
+var testval='';
+var tempval=0;
+var control_val;
+var startingtime;
+
+//var knob = pureknob.createKnob(250, 250);
+
+
+setInterval(xid,5000);
+function xid(){
+
+	var xhr = new XMLHttpRequest();
+xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/checknet.php?name=kean", true);
+xhr.timeout = 5000;
+xhr.onload = function() {
+  //alert(xhr.responseText);
+ Ntester="System Online";
+ testval=xhr.responseText;
+ x=xhr.status;
+};
+xhr.ontimeout = function (e) {
+Ntester="System Offline";
+};
+xhr.send();
+//document.writeln(x); 
+var sc1 =document.getElementById('nh');
+var sc2 =document.getElementById('nh1');
+var sc3 =document.getElementById('nh2');
+
+if(x==200){
+	imgurl='img/Globe_Connected.png';}
+else{
+	imgurl='img/Globe_Disconnect.png';}
+sc1.innerHTML='<img name="nconnect" src="'+imgurl+'" width="53" height="50" alt="">';
+sc2.innerHTML='<img name="nconnect" src="'+imgurl+'" width="53" height="50" alt="">';
+sc3.innerHTML='<img name="nconnect" src="'+imgurl+'" width="53" height="50" alt="">';
+
+//alert(testval);
+x=0;
+testval='';
+}
+
+
+function login(){
+var usernamex=document.login_form.username.value;
+var passwordx=document.login_form.password.value;
+var netcon=document.getElementById('nh');
+var queryString="? password="+passwordx;
+queryString+="&username="+usernamex;
+if(imgurl=='img/Globe_Connected.png')
+{
+	if(usernamex==''){
+	mymodal(document.title,'Please Enter your username');}
+	else if(passwordx==''){
+		mymodal(document.title,'Please Enter the password');}
+	else{
+		document.getElementById('loading').style.display='block';
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/login.php"+queryString, true);
+			xhr.onload = function() {
+				document.getElementById('loading').style.display='none';
+			  if(xhr.responseText=='success'){
+				  window.location.replace(href="#bar");}
+			 else{mymodal(document.title,"Wrong password or username ");}
+			};
+			xhr.send();
+	}
+}
+else{
+	mymodal(document.title,'No iternet connection');}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function(cb) {
+        var i = 0, s = this.length;
+        for (; i < s; i++) {
+            cb && cb(this[i], i, this);
+        }
+    }
+}*/
+
+document.fonts && document.fonts.forEach(function(font) {
+    font.loaded.then(function() {
+        if (font.family.match(/Led/)) {
+            document.gauges.forEach(function(gauge) {
+                gauge.update();
+                gauge.options.renderTo.style.visibility = 'visible';
+            });
+        }
+    });
+});
+
+var timers = [];
+
+function animateGauges() {
+    document.gauges.forEach(function(gauge) {
+        timers.push(setInterval(function settemp() {
+			gauge.value=tempval;
+            /*gauge.value = Math.random()
+                *(gauge.options.maxValue - gauge.options.minValue) +
+                gauge.options.minValue;*/
+        },gauge.animation.duration+50));
+    });
+
+}
+
+function stopGaugesAnimation() {
+    timers.forEach(function(timer) {
+        clearInterval(timer);
+    });
+}
+
+function resize() {
+    var size = parseFloat(document.getElementById('gauge-size').value) || 400;
+
+    document.gauges.forEach(function (gauge) {
+        gauge.update({ width: size, height: size });
+    });
+}
+
+function updateUnits() {
+    document.gauges.forEach(function (gauge) {
+        gauge.update({ units: 'Miles' });
+    });
+}
+
+function setText() {
+    var text = document.getElementById('gauge-text').value;
+
+    document.gauges.forEach(function (gauge) {
+        gauge.update({ valueText: text });
+    });
+}
+
+window.onload = function gdraw() {
+    // refer gauge
+    var gauge = document.gauges[0];
+	//makes sure animategauges() funtion initializes only once
+control_val=1;
+    // this will draw red or blue circle on a gauge plate depending on
+    // current value
+    gauge.on('beforeNeedle', function () {
+        // getting canvas 2d drawing context
+        var context = this.canvas.context;
+
+        // we can use gauge context special 'max' property which represents
+        // gauge radius in a real pixels and calculate size of relative pixel
+        // for our drawing needs
+        var pixel = context.max / 100;
+
+        // step out our circle center coordinate by 30% of its radius from
+        // gauge center
+        var centerX = 30 * pixel;
+
+        // stay in center by Y-coordinate
+        var centerY = 0;
+
+        // use circle radius equal to 5%
+        var radius = 5 * pixel;
+
+        // save previous context state
+        context.save();
+
+        // draw circle using canvas JS API
+        context.beginPath();
+        context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+
+        var gradient = context.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, radius);
+        gradient.addColorStop(0, this.options.value <= 0 ? '#aaf' : '#faa');
+        gradient.addColorStop(0.82, this.options.value <= 50 ? '#00f' : '#f00');
+        gradient.addColorStop(1, this.options.value <= 0 ? '#88a' : '#a88');
+
+        context.fillStyle = gradient;
+        context.fill();
+        context.closePath();
+
+        // restore previous context state to prevent break of
+        // further drawings
+        context.restore();
+    });
+
+    // redraw the gauge if it has been already drawn
+    gauge.draw();
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
+			function settemperature(){
+				var xhr = new XMLHttpRequest();
+xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/temp_sensor_data.php", true);
+xhr.onload = function () {
+  // alert(xhr.responseText);
+  var xhrstr=xhr.responseText;
+  var xhrarray = xhrstr.split(",",3);
+  var date_d = document.getElementById('date_data');
+  //var time_d = document.getElementById('time_data');
+   tempval=(xhrarray[0]);
+    if(control_val==1){
+	  animateGauges();
+	  control_val=0;}
+  date_d.innerHTML='Temperature ReadingDate: '+xhrarray[1]+'</br>'+'Temperature ReadingTime: '+xhrarray[2];
+  //time_d.innerHTML='ReadingTime: '+xhrarray[2];
+};
+xhr.send();
+			}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var boiler_status=0;
+var session_status;
+function micro_status(){
+				var xhr = new XMLHttpRequest();
+xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/micro_status_data.php", true);
+xhr.onload = function () {
+  // alert(xhr.responseText);
+  var xhrstr=xhr.responseText;
+  //var xhrarray = xhrstr.split(",",3);
+  var status_b = document.getElementById('boiler_status');
+  boiler_status=xhrstr;
+  if(xhrstr==1){
+  status_b.innerHTML='Boiler Status:ON';
+  document.getElementById("btn_text").innerHTML="Turn Off-Boiler";
+  document.getElementById("btn_icon").innerHTML='<img name="timeroff" src="img/timer_on.png" alt="">';}
+  else{
+  status_b.innerHTML='Boiler Status:OFF';
+  document.getElementById("btn_text").innerHTML="Turn ON-Boiler";
+  document.getElementById("btn_icon").innerHTML='<img name="timeroff" src="img/timer_off.png" alt="">';
+  }
+  //startingtime=xhrarray[0];
+  //session_status=xhrarray[2];
+    //alert(startingtime);
+}; 
+xhr.send();
+			}
+setInterval(settemperature,5000)
+setInterval(micro_status,5000)
+//setInterval(mcu_status_update,5000)
+function mymodal(h,b){
+	var h,b;
+var msghead = document.getElementById('alertheader');	
+var msgbody = document.getElementById('msgbody');	
+	msghead.innerHTML=h;
+	msgbody.innerHTML=b;
+	document.getElementById('alertdiv').style.display='block';
+}
+function closealert(){
+	document.getElementById('alertdiv').style.display='none';
+}
+
+function add_users(){
+var fname,lname,uname,pwds,email;
+fname=document.add_users_form.fname.value;
+lname=document.add_users_form.lname.value;
+uname=document.add_users_form.uname.value;
+email=document.add_users_form.email.value;
+pwds=document.add_users_form.pwd.value;
+accs=document.add_users_form.accs.value;
+userprivilidge=document.add_users_form.userprivilidge.value;
+
+if((fname=="")||(lname=="")||(uname=="")||(email=="")||(pwds==""))
+{
+	alert("Please fill all fields");
+}
+else
+{
+var queryString="? fname="+fname+"&lname="+lname+"&uname="+uname+"&email="+email+"&pwds="+pwds+"&accs="+accs+"&userprivilidge="+userprivilidge;
+var xhr = new XMLHttpRequest();
+			xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/add_users.php"+queryString, true);
+			xhr.send();
+}
+}
+/*
+var timer_status;
+var start_time;
+					
+					
+function datentime(){
+	
+	timer_status='START';
+	document.getElementById('dnt').style.display='none';
+	var endtime=new Date("01/01/2019 " + document.getElementById('timefield').value);
+	var start_t_h = new Date("01/01/2019 " + startingtime).getHours();
+	var start_t_m = new Date("01/01/2019 " + startingtime).getMinutes();
+	var endtime_h = new Date("01/01/2019 " + document.getElementById('timefield').value).getHours();
+	var endtime_m = new Date("01/01/2019 " + document.getElementById('timefield').value).getMinutes();
+
+					
+					
+	if(((endtime_h*60)+endtime_m)>((new Date().getHours()*60)+ new Date().getMinutes()))
+	{		
+		//alert(((endtime_h*60)+endtime_m)+":"+((new Date().getHours()*60)+ new Date().getMinutes()));
+		alert(session_status);
+			if(session_status=='NEW'){
+				if(confirm("There is an ongoing Timer, Do you want to overide it?")){
+					update_starttime();
+					timer_exec();}}
+			else if(session_status=='OLD'){
+				
+					function update_starttime(){
+					var xhr = new XMLHttpRequest();
+					var querystring='endtime='+endtime+'&session_status=NEW';
+					xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/boiler_start.php?"+querystring, true);
+					xhr.onload = function () {
+					alert(xhr.responseText);};
+					xhr.send();
+					}	
+					update_starttime();		
+					timer_exec();}
+					
+					function timer_exec(){
+			var start_t=(start_t_h*60)+start_t_m;
+			var countdown_s=(start_t-((new Date().getHours()*60)+ new Date().getMinutes()))*6000;
+			var interval=10;
+			var milliseconds=document.getElementById('ms');
+			
+			//alert(countdown_s);
+			if(countdown_s<=0){
+				update_boiler_status(1);}
+			else{
+				document.getElementById('timerbox').style.display='flex';
+		var resetinterval=setInterval(function(){
+		if(timer_status!='STOP'){	
+		
+			if(countdown_s==0){
+				update_boiler_status(1);
+				clearInterval(resetinterval);
+				document.getElementById('timerbox').style.display='none';}
+			else{
+		countdown_s-=1;
+		milliseconds.innerHTML=countdown_s;}
+		//alert(countdown_s);
+		}
+		else{clearInterval(resetinterval);
+			document.getElementById('timerbox').style.display='none';}
+		},interval);}
+					}//function timer exec
+	}
+	else
+	{
+		//alert(2);
+		mymodal(document.title,"Invalid time format: use HH:MM.<br> Please use 24 hour system only");
+	}
+}
+function start_boiler(){
+	if(startingtime!=''){
+		document.getElementById('dnt').style.display='block';
+	}
+	else{
+			mymodal(document.title,"Heating Duration Not set!<br>Please check Internet connection");	
+		}
+
+}
+function canceltimer(){
+	
+if(confirm('Do you want to cancel the timer')){
+timer_status='STOP';
+}
+	}*/
+function start_boiler_validation(){
+	if(boiler_status==1){
+		if(confirm('Initiate Boiler Shutdown Process')){
+			update_boiler_status(0);
+		}
+	}
+	else{update_boiler_status(1);}
+}
+var status_val;		
+function update_boiler_status(status_val){
+var xhr = new XMLHttpRequest();
+var querystring='boiler_status='+status_val;
+document.getElementById('loading1').style.display='block'; 
+xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/heating_start.php?"+querystring, true);
+
+xhr.onload = function () {
+document.getElementById('loading1').style.display='none';
+};
+xhr.send();
+			}
+
+/////////////////////////////////////////////////////
+var consVolume;//stores water level values from the database
+	FusionCharts.ready(function() {
+  var fuelVolume = 110,
+    fuelWidget = new FusionCharts({
+      type: 'cylinder',
+      dataFormat: 'json',
+      id: 'fuelMeter',
+	   setTransparent: '1',
+      renderAt: 'chart-container',
+      width: '150',
+      height: '250',
+      dataSource: {
+        "chart": {
+          "theme": "fusion",
+          "caption": "Water Level",
+          //"subcaption": "Bakersfield Central",
+          "lowerLimit": "0",
+          "upperLimit": "120",
+          "lowerLimitDisplay": "",
+          "upperLimitDisplay": "",
+          "numberSuffix": " L",
+          "showValue": "1",
+          "chartBottomMargin": "45",
+          "showValue": "0",
+		  "cyloriginx": "50",
+        "cyloriginy": "205",
+        "cylradius": "40",
+        "cylheight": "150",
+		 "cylFillColor": "#1aaf5d",
+		"bgColor": "#DDDDDD",
+        "bgAlpha": "70",
+		"canvasBgAlpha": '0',
+		"legendBgAlpha": '0'
+        },
+        "value": "75",
+        "annotations": {
+          "origw": "400",
+          "origh": "190",
+          "autoscale": "1",
+          "groups": [{
+            "id": "range",
+            "items": [{
+                "id": "rangeBg",
+                "type": "rectangle",
+                "x": "$canvasCenterX-45",
+                "y": "$chartEndY-30",
+                "tox": "$canvasCenterX +45",
+                "toy": "$chartEndY-75",
+                "fillcolor": "#6caa03"
+              },
+              {
+                "id": "rangeText",
+                "type": "Text",
+                "fontSize": "11",
+                "fillcolor": "#333333",
+                "text": "10 L",
+                "x": "$chartCenterX-65",
+                "y": "$chartEndY-50"
+              }
+            ]
+          }]
+        }
+
+      },
+      "events": {
+        "rendered": function(evtObj, argObj) {
+          setInterval(function() {
+			 // var consVolume=0; 
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "http://digisofttechnologies3.000webhostapp.com/microcon/water_level_data.php", true);
+			xhr.onload = function () {
+			consVolume=xhr.responseText;
+			
+			FusionCharts("fuelMeter").feedData("&value=" + consVolume);
+            fuelVolume = consVolume;
+			};
+			xhr.send();
+			  
+            //(fuelVolume < 10) ? (fuelVolume = 80) : "";
+            //var consVolume = fuelVolume - (Math.floor(Math.random() * 3));
+            
+          }, 1000);
+        },
+        //Using real time update event to update the annotation 
+        //showing available volume of Diesel
+        "realTimeUpdateComplete": function(evt, arg) {
+          var annotations = evt.sender.annotations,
+            dataVal = evt.sender.getData(),
+            colorVal = (dataVal >= 70) ? "#6caa03" : ((dataVal <= 35) ? "#e44b02" : "#f8bd1b");
+          //Updating value
+          annotations && annotations.update('rangeText', {
+            "text": dataVal + " ltrs"
+          });
+          //Changing background color as per value
+          annotations && annotations.update('rangeBg', {
+            "fillcolor": colorVal
+          });
+
+        }
+      }
+    }).render();
+});
+
+
+</script>
+</head>
+
+<body>
+<div id="alertdiv" class="alertdiv">
+	      <div id="alertheader" align="left" class="alerthead"></div>
+	      <div id="msgbody"></div>
+<div class="alertbtn" align="center" onClick="closealert()">OK</div>
+        </div>
+<!-- Start of first page -->
+<div data-role="page" id="foo" class="ui-content">
+
+
+<div data-role="header" style="background-color:rgba(0, 0, 255, 0.1)">
+<div style="top:9px; left:5px"><img name="banner_flag" src="img/kenya-flag.png" width="84" height="43" alt=""></div> 
+<div id="nh" style="right:0px;top:0px; position:absolute"><img name="nconnect" src="img/Globe_Disconnect.png" width="53" height="50" alt=""></div>    
+</div><!-- /header -->
+
+	<div role="main" class="ui-content" align="center">
+    <p></p>
+	  <p>&nbsp;</p>
+	  <form name="login_form">
+	    <p>&nbsp;        </p>
+	    
+	    <p>
+	      <label for="usern">Username</label> 
+	      <input type="text" name="username" id="usern">
+        </p>
+	    <p>
+	      <label for="pwd">Password</label>
+	      <input type="password" name="password" id="pwd">
+	   </p>
+	    <p>
+	      <input type="button" onclick= "login()" value="Login"/>
+         
+	    </p>
+	    <p>&nbsp;</p>
+	  </form>
+	  <div id="loading" class="loading"> <div class="lds-ring"><div></div><div></div><div></div><div></div></div> </div>
+      <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+      
+	</div><!-- /content -->
+
+
+	<div data-role="footer" data-position="fixed" class="footerx">
+		<h4>Login</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of second page -->
+<div data-role="page" id="bar" class="ui-content" >
+
+	<div data-role="header" id="nh1" align="right" data-position="fixed" style="background-color:rgba(0, 0, 255, 0.1)">
+		<img name="nconnect" src="img/Globe_Disconnect.png" width="53" height="50" alt="">
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" align="center">
+    <div class="menu-content">
+		<table width="200" border="0" cellspacing="25">
+		  <tr>
+		    <td width="70"><a href=""><img src="img/leaf.png" width="70" height="70"></a>Irrigation System</td>
+		    <td width="93"><a href=""><img src="img/intranet.png" width="70" height="70"></a>GPS Avionics</td>
+		    <td width="15"><a href="#page3"><img src="img/designFloat.png" width="70" height="70"></a>Boiler Control</td>
+	      </tr>
+		  <tr>
+		    <td><a href=""><img src="img/Apps-utilities-terminal-icon.png" width="70" height="70"></a>Commandline Terminal</td>
+		    <td><a href=""><img src="img/Apps-libreoffice-calc-icon.png" width="70" height="70"></a>Boiler Statistics</td>
+		    <td><a href=""><img src="img/Apps-libreoffice-base-icon.png" width="70" height="70"></a>Graphical Analysis</td>
+	      </tr>
+		  <tr>
+		    <td><a href=""><img src="img/Apps-gnome-display-properties-icon.png" width="70" height="70"></a>Network Settings</td>
+		    <td><a href=""><img src="img/Admin-icon.png" width="70" height="70"></a>Administrator</td>
+		    <td><a href=""><img src="img/2-Developer-icon.png" width="70" height="70"></a>Server Settings</td>
+	      </tr>
+		  <tr>
+		    <td><a href=""><img src="img/settings-icon_004.png" width="70" height="70"></a>System Settings</td>
+		    <td><a href=""><img src="img/network-driver-connected.png" width="70" height="70"></a>Router Console</td>
+		    
+	      </tr>
+		  
+	  </table>
+		<p>&nbsp;</p>
+	</div>	
+	</div><!-- /content -->
+
+	<div data-role="footer" data-position="fixed">
+		<h4>System Menu</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+
+<div data-role="page" id="page3" class="ui-content">
+
+	<div data-role="header" id="nh2" align="right" style="background-color:rgba(0, 0, 255, 0.1)">
+		<img name="nconnect" src="img/Globe_Disconnect.png" width="53" height="50" alt="">
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content"  align="center">
+    <table width="0" border="0">
+  <tr>
+<td>
+    <div id="gauge3" align="center" class="gauge-container three">
+    <canvas data-type="radial-gauge"
+        data-width="200"
+        data-height="200"
+        data-units="°C"
+        data-title="Temperature"
+        data-min-value="0"
+        data-max-value="100"
+        data-major-ticks="[0,10,20,30,40,50,60,70,80,90,100]"
+        data-minor-ticks="2"
+        data-stroke-ticks="true"
+        data-highlights='[
+                    {"from": 0, "to": 50, "color": "rgba(0,0, 255, .3)"},
+                    {"from": 50, "to": 100, "color": "rgba(255, 0, 0, .3)"}
+                ]'
+        data-ticks-angle="225"
+        data-start-angle="67.5"
+        data-color-major-ticks="#ddd"
+        data-color-minor-ticks="#ddd"
+        data-color-title="#eee"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-plate="#222"
+        data-border-shadow-width="0"
+        data-borders="true"
+        data-needle-type="arrow"
+        data-needle-width="2"
+        data-needle-circle-size="7"
+        data-needle-circle-outer="true"
+        data-needle-circle-inner="false"
+        data-animation-duration="1500"
+        data-animation-rule="linear"
+        data-color-border-outer="#333"
+        data-color-border-outer-end="#111"
+        data-color-border-middle="#222"
+        data-color-border-middle-end="#111"
+        data-color-border-inner="#111"
+        data-color-border-inner-end="#333"
+        data-color-needle-shadow-down="#333"
+        data-color-needle-circle-outer="#333"
+        data-color-needle-circle-outer-end="#111"
+        data-color-needle-circle-inner="#111"
+        data-color-needle-circle-inner-end="#222"
+        data-value-box-border-radius="0"
+        data-color-value-box-rect="#222"
+        data-color-value-box-rect-end="#333"
+        data-font-value="Led"
+        data-font-numbers="Led"
+        data-font-title="Led"
+        data-font-units="Led"
+></canvas>
+    </div>
+   </td>
+    <td><div id="chart-container">FusionCharts XT will load here!</div></td>
+  </tr>
+</table>
+   
+   
+     <div id="loading1" class="loading"> <div class="lds-ring"><div></div><div></div><div></div><div></div></div> </div>
+<div align="left"  class="status_content">
+      <p id="date_data"></p> 
+      <p id="status_data"></p>
+      <p id="boiler_status"></p>
+      <div onClick="start_boiler_validation()" style="background-color:rgba(51,51,51,1); width:150px;" class="h2"><table width="0" border="0">
+  <tr>
+    <td id="btn_text">Start Boiler</td>
+    <td id="btn_icon"><img name="timeroff" src="img/timer_off.png" alt=""></td>
+  </tr>
+</table>
+
+      </div>
+      
+      <div id="dnt" class="time_select" align="center" style="display:none">
+        <div><H2>ENTER EXPECTED SHOWER TIME</H2></div>
+        <input name="timerx" type="TEXT" id="timefield" width="200">
+        <button onClick="datentime()">Set</button>
+    </div>
+      <p>&nbsp;</p>
+      </div>
+            <div id="timerbox" class="timerbox1" style="height: 44px; width:222px; background-color:rgba(0,255,153,0.4); font-family:Led; color:#FF0000; display:none;" align="left">
+              <div onClick="canceltimer()" id="offbtn" style="position:absolute; left: 188px; top: 6px;"><img name="timeroff" src="img/timer_off.png" alt=""></div>
+              <div id="ms" class="h1" style="display: flex; height:30px; position:absolute; border-width:thick; width: 143px; left: 1px; top: 1px;"></div>
+            </div>
+
+  </div><!-- /content -->
+	<div data-role="footer" data-position="fixed" >
+		<h4>Water Heating System</h4>
+	</div><!-- /footer -->
+    
+    </div><!-- /page -->
+    
+    
+    
+<div data-role="page" id="users" class="ui-content">
+
+
+<div data-role="header" style="background-color:rgba(0, 0, 255, 0.1)">
+<div style="top:9px; left:5px"><img name="banner_flag" src="img/kenya-flag.png" width="84" height="43" alt=""></div> 
+<div id="nh" style="right:0px;top:0px; position:absolute"><img name="nconnect" src="img/Globe_Disconnect.png" width="53" height="50" alt=""></div>    
+</div><!-- /header -->
+
+	<div role="main" class="ui-content" align="center">
+    <p></p>
+	  <p>&nbsp;</p>
+      <div align="left">
+	  <form name="add_users_form">
+        <label>
+        <label for="fname">First Name</label> 
+         
+          <input type="text" name="fname" id="fnamei">
+          <br>
+          Last Name
+          <input type="text" name="lname" id="lnamei">
+          <br>
+          Usern ame
+          <input type="text" name="uname" id="unamei">
+          <br>
+          Password
+          <input type="password" name="pwd" id="pwdsi">
+          <br>
+          E-mail
+          <input type="text" name="email" id="emaili">
+          <br>
+          <label for="userprivilidge">User Privilidge</label>
+          <select name="userprivilidge" id="userprivilidge">
+          <option>Admin</option>
+         <option>Guest</option>
+          
+          </select>
+          <br>
+          <label for="accs">Account Status</label>
+          <select name="accs" id="accs">
+          <option>Active</option>
+         <option>Suspended</option>
+         </select>
+          <br>
+         
+          <input type="button" value="Save" onClick="add_users()">
+          <br>
+        
+        </label>
+	  </form></div>
+	  <div id="loading" class="loading"> <div class="lds-ring"><div></div><div></div><div></div><div></div></div> </div>
+      <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+	  <p>&nbsp;</p>
+      
+	</div><!-- /content -->
+
+
+	<div data-role="footer" data-position="fixed" class="footerx">
+		<h4></h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+</body>
+
+</html>
